@@ -1,5 +1,6 @@
-// const apiKey = "e349553e4be1f3a108798ec32604942e";
-// const apiUrl = "https://api.openweathermap.org/data/2.5/weather?units=metric&q=";
+const apiKey = "e349553e4be1f3a108798ec32604942e";
+const apiUrl =
+  "https://api.openweathermap.org/data/2.5/weather?units=metric&q=";
 const searchBox = document.querySelector(".search input");
 const searchBtn = document.querySelector(".search button");
 const weatherIcon = document.querySelector(".weather-icon");
@@ -10,21 +11,27 @@ const weatherIcons = {
   Clear: "image/clear.png",
   Mist: "image/mist.png",
 };
+const cityElem = document.querySelector(".city");
+const tempElem = document.querySelector(".term");
+const humidityElem = document.querySelector(".humidity");
+const windElem = document.querySelector(".wind");
+const weatherElem = document.querySelector(".weather");
+const errorElem = document.querySelector(".error");
 
 async function checkWeather(city) {
-  const response = await fetch(apiUrl + city + `&appid=${apiKey}`);
+  try {
+    const response = await fetch(apiUrl + city + `&appid=${apiKey}`);
 
-  if (response.status == 404) {
-    document.querySelector(".error").style.display = "block";
-    document.querySelector(".weather").style.display = "none";
-  } else {
-    let data = await response.json();
+    if (!response.ok) {
+      throw new Error("City not found");
+    }
 
-    document.querySelector(".city").innerHTML = data.name;
-    document.querySelector(".term").innerHTML =
-      Math.round(data.main.temp) + "°C";
-    document.querySelector(".humidity").innerHTML = data.main.humidity + "%";
-    document.querySelector(".wind").innerHTML = data.wind.speed + " km/h";
+    const data = await response.json();
+
+    cityElem.innerHTML = data.name;
+    tempElem.innerHTML = Math.round(data.main.temp) + "°C";
+    humidityElem.innerHTML = data.main.humidity + "%";
+    windElem.innerHTML = data.wind.speed + " km/h";
 
     const weatherMain = data.weather[0].main;
 
@@ -32,9 +39,14 @@ async function checkWeather(city) {
       weatherIcon.src = weatherIcons[weatherMain];
     }
 
-    document.querySelector(".weather").style.display = "block";
-    document.querySelector(".error").style.display = "none";
+    weatherElem.style.display = "block";
+    errorElem.style.display = "none";
+  } catch (e) {
+    weatherElem.style.display = "none";
+    errorElem.style.display = "block";
+    console.error("Помилка при отриманні погоди:", error.message);
   }
+
 }
 
 searchBtn.addEventListener("click", () => {
